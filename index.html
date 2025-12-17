@@ -14,94 +14,76 @@
       align-items: center;
       justify-content: center;
       font-family: Arial, sans-serif;
-      color: white;
     }
     .card {
       background: white;
-      color: #333;
-      padding: 30px;
+      padding: 32px;
       border-radius: 16px;
-      width: 90%;
-      max-width: 400px;
       text-align: center;
+      width: 90%;
+      max-width: 420px;
       box-shadow: 0 10px 30px rgba(0,0,0,.3);
     }
     .icon {
       font-size: 48px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
-    .success { color: green; }
-    .error { color: red; }
-    button {
-      margin-top: 16px;
-      padding: 12px 20px;
-      border-radius: 24px;
-      border: none;
-      background: #a50034;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+    .success { color: #2e7d32; }
+    .error { color: #c62828; }
+    p { color: #444; }
   </style>
 
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<div class="card">
-  <div id="status">
-    <div class="icon">⏳</div>
-    <h2>Verifying your email...</h2>
-    <p>Please wait</p>
-  </div>
+<div class="card" id="card">
+  <div class="icon">⏳</div>
+  <h2>Verifying your email…</h2>
+  <p>Please wait</p>
 </div>
 
 <script>
-  const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
-  const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
-
+  const supabaseUrl = "https://YOUR_PROJECT_ID.supabase.co";
+  const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
   const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("code");
-  const type = params.get("type") || "signup";
+  async function verify() {
+    try {
+      // 1️⃣ Read code from URL (query OR hash)
+      const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
+      const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
 
-  async function verifyEmail() {
-    if (!token) {
-      document.getElementById("status").innerHTML = `
-        <div class="icon error">❌</div>
-        <h2>Invalid verification link</h2>
-        <p>Please request a new verification email.</p>
-      `;
-      return;
-    }
+      const code =
+        queryParams.get("code") ||
+        hashParams.get("code");
 
-    const { error } = await supabase.auth.verifyOtp({
-      token,
-      type
-    });
+      if (!code) {
+        throw new Error("Invalid or missing verification code.");
+      }
 
-    if (error) {
-      document.getElementById("status").innerHTML = `
-        <div class="icon error">❌</div>
-        <h2>Verification failed</h2>
-        <p>${error.message}</p>
-      `;
-    } else {
-      document.getElementById("status").innerHTML = `
+      // 2️⃣ Exchange code for session (THIS verifies email)
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (error) throw error;
+
+      // 3️⃣ Success UI
+      document.getElementById("card").innerHTML = `
         <div class="icon success">✅</div>
         <h2>Email verified!</h2>
-        <p>You may now return to the SafeCall app.</p>
+        <p>You may now return to the SafeCall app and log in.</p>
       `;
 
-      setTimeout(() => {
-        window.location.href = "https://rayray44.github.io/safecall-email-verification/";
-      }, 3000);
+    } catch (err) {
+      document.getElementById("card").innerHTML = `
+        <div class="icon error">❌</div>
+        <h2>Verification failed</h2>
+        <p>${err.message}</p>
+      `;
     }
   }
 
-  verifyEmail();
+  verify();
 </script>
 
 </body>
