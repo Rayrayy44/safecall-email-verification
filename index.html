@@ -5,9 +5,6 @@
   <title>SafeCall Email Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ✅ CORRECT Supabase UMD build -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
   <style>
     body {
       margin: 0;
@@ -34,63 +31,15 @@
       font-size: 48px;
       margin-bottom: 16px;
     }
-
-    .success { color: green; }
-    .error { color: red; }
   </style>
 </head>
 
 <body>
   <div class="card">
-    <div id="icon" class="icon">⏳</div>
-    <h2 id="title">Verifying your email…</h2>
-    <p id="message">Please wait</p>
+    <div class="icon">✅</div>
+    <h2>Email Verified</h2>
+    <p>Your email has been successfully verified.</p>
+    <p>Please return to the <strong>SafeCall app</strong> to continue.</p>
   </div>
-
-  <script>
-    // 🔐 Supabase config
-    const SUPABASE_URL = "https://ifoluumtfnkhszhnhveu.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
-
-    // ✅ window.supabase is now defined
-    const sb = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
-
-    async function verifyEmail() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const token_hash = params.get("token_hash");
-        const type = params.get("type");
-
-        if (!token_hash || !type) {
-          throw new Error("Invalid or expired verification link.");
-        }
-
-        const { error } = await sb.auth.verifyOtp({
-          type,
-          token_hash,
-        });
-
-        if (error) throw error;
-
-        document.getElementById("icon").textContent = "✅";
-        document.getElementById("icon").className = "icon success";
-        document.getElementById("title").textContent = "Email Verified";
-        document.getElementById("message").textContent =
-          "Your email has been verified. You may now return to the SafeCall app.";
-
-      } catch (err) {
-        document.getElementById("icon").textContent = "❌";
-        document.getElementById("icon").className = "icon error";
-        document.getElementById("title").textContent = "Verification Failed";
-        document.getElementById("message").textContent = err.message;
-        console.error(err);
-      }
-    }
-
-    verifyEmail();
-  </script>
 </body>
 </html>
