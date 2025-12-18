@@ -1,61 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>SafeCall Verify</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>SafeCall Email Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #a50034, #ff4d6d);
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .card {
+      background: white;
+      color: #333;
+      padding: 30px 40px;
+      border-radius: 16px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .success { color: green; }
+    .error { color: red; }
+  </style>
 </head>
+
 <body>
+  <div class="card">
+    <div id="icon" class="icon">⏳</div>
+    <h2 id="title">Verifying your email</h2>
+    <p id="message">Please wait…</p>
+  </div>
 
-<h2 id="status">⏳ Loading verification…</h2>
-
-<script>
-  try {
-    document.getElementById("status").innerText = "📦 Supabase loaded";
-
+  <script>
     const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
     const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
 
-    const supabase = window.supabase.createClient(
+    // ✅ IMPORTANT: use a DIFFERENT variable name
+    const supabaseClient = window.supabase.createClient(
       supabaseUrl,
-      supabaseKey
+      supabaseAnonKey
     );
 
-    document.getElementById("status").innerText = "🔍 Reading verification code…";
+    async function verifyEmail() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
 
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+        if (!code) {
+          throw new Error("Verification code missing from URL.");
+        }
 
-    if (!code) {
-      document.getElementById("status").innerText =
-        "❌ No verification code found in URL";
-      throw new Error("Missing code");
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          throw error;
+        }
+
+        document.getElementById("icon").textContent = "✅";
+        document.getElementById("title").textContent = "Email Verified";
+        document.getElementById("message").textContent =
+          "Your email has been verified. You may now return to the SafeCall app.";
+
+      } catch (err) {
+        document.getElementById("icon").textContent = "❌";
+        document.getElementById("title").textContent = "Verification Failed";
+        document.getElementById("message").textContent = err.message;
+        document.getElementById("message").className = "error";
+        console.error(err);
+      }
     }
 
-    document.getElementById("status").innerText =
-      "🔐 Verifying email with Supabase…";
-
-    supabase.auth.exchangeCodeForSession(code)
-      .then(({ error }) => {
-        if (error) {
-          document.getElementById("status").innerText =
-            "❌ Verification failed: " + error.message;
-        } else {
-          document.getElementById("status").innerText =
-            "✅ Email verified! You may return to the app.";
-        }
-      });
-
-  } catch (e) {
-    document.getElementById("status").innerText =
-      "❌ JavaScript error: " + e.message;
-    console.error(e);
-  }
-</script>
-
+    verifyEmail();
+  </script>
 </body>
 </html>
-
