@@ -5,6 +5,9 @@
   <title>SafeCall Email Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       margin: 0;
@@ -18,28 +21,67 @@
 
     .card {
       background: white;
-      color: #333;
-      padding: 30px 40px;
-      border-radius: 16px;
+      padding: 32px;
+      border-radius: 18px;
       text-align: center;
       width: 90%;
       max-width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
 
     .icon {
       font-size: 48px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
+
+    .success { color: #2e7d32; }
+    .error { color: #c62828; }
   </style>
 </head>
 
 <body>
   <div class="card">
-    <div class="icon">✅</div>
-    <h2>Email Verified</h2>
-    <p>Your email has been successfully verified.</p>
-    <p>Please return to the <strong>SafeCall app</strong> to continue.</p>
+    <div id="icon" class="icon">⏳</div>
+    <h2 id="title">Verifying your email…</h2>
+    <p id="message">Please wait</p>
   </div>
+
+  <script>
+    // 🔑 YOUR SUPABASE PROJECT DETAILS
+    const SUPABASE_URL = "https://ifoluumtfnkhszhnhveu.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_PUBLIC_ANON_KEY"; // anon key ONLY
+
+    // ⚠️ IMPORTANT: DO NOT redeclare "supabase"
+    const client = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    async function verifyEmail() {
+      try {
+        // ✅ This automatically processes the verification token in URL
+        const { data, error } = await client.auth.getSession();
+
+        if (error || !data.session) {
+          throw new Error("Invalid or expired verification link.");
+        }
+
+        document.getElementById("icon").textContent = "✅";
+        document.getElementById("title").textContent = "Email Verified";
+        document.getElementById("title").className = "success";
+        document.getElementById("message").textContent =
+          "Your email has been verified. You may now return to the SafeCall app.";
+
+      } catch (err) {
+        document.getElementById("icon").textContent = "❌";
+        document.getElementById("title").textContent = "Verification Failed";
+        document.getElementById("title").className = "error";
+        document.getElementById("message").textContent = err.message;
+        console.error(err);
+      }
+    }
+
+    verifyEmail();
+  </script>
 </body>
 </html>
