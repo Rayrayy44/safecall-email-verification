@@ -1,45 +1,97 @@
-<script>
-  const SUPABASE_URL = "https://ifoluumtfnkhszhnhveu.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SafeCall Email Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  // ✅ IMPORTANT: different variable name
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+  <!-- Supabase JS (global window.supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  async function verifyEmail() {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const token_hash = params.get("token_hash");
-      const type = params.get("type"); // signup | magiclink | recovery
-
-      if (!token_hash || !type) {
-        throw new Error("Invalid or expired verification link.");
-      }
-
-      const { error } = await supabaseClient.auth.verifyOtp({
-        type,
-        token_hash,
-      });
-
-      if (error) throw error;
-
-      document.getElementById("icon").textContent = "✅";
-      document.getElementById("icon").className = "icon success";
-      document.getElementById("title").textContent = "Email Verified";
-      document.getElementById("message").textContent =
-        "Your email has been verified. You may now return to the SafeCall app.";
-
-    } catch (err) {
-      document.getElementById("icon").textContent = "❌";
-      document.getElementById("icon").className = "icon error";
-      document.getElementById("title").textContent = "Verification Failed";
-      document.getElementById("message").textContent =
-        err.message ?? "Verification failed.";
-      console.error(err);
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #a50034, #ff4d6d);
+      font-family: Arial, sans-serif;
+      color: white;
     }
-  }
 
-  verifyEmail();
-</script>
+    .card {
+      background: white;
+      color: #333;
+      padding: 30px 40px;
+      border-radius: 16px;
+      text-align: center;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div id="icon" class="icon">⏳</div>
+    <h2 id="title">Verifying your email…</h2>
+    <p id="message">Please wait</p>
+  </div>
+
+  <script>
+    // 🔐 Supabase config
+    const SUPABASE_URL = "https://ifoluumtfnkhszhnhveu.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
+
+    // ✅ IMPORTANT: do NOT name this variable "supabase"
+    const sb = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    async function verifyEmail() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const token_hash = params.get("token_hash");
+        const type = params.get("type");
+
+        if (!token_hash || !type) {
+          throw new Error("Invalid or expired verification link.");
+        }
+
+        const { error } = await sb.auth.verifyOtp({
+          type,
+          token_hash,
+        });
+
+        if (error) throw error;
+
+        document.getElementById("icon").textContent = "✅";
+        document.getElementById("icon").className = "icon success";
+        document.getElementById("title").textContent = "Email Verified";
+        document.getElementById("message").textContent =
+          "Your email has been verified. You may now return to the SafeCall app.";
+
+      } catch (err) {
+        document.getElementById("icon").textContent = "❌";
+        document.getElementById("icon").className = "icon error";
+        document.getElementById("title").textContent = "Verification Failed";
+        document.getElementById("message").textContent = err.message;
+        console.error(err);
+      }
+    }
+
+    verifyEmail();
+  </script>
+</body>
+</html>
