@@ -52,10 +52,10 @@
     const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
     const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
 
-    // ✅ IMPORTANT: use a DIFFERENT variable name
+    // ✅ FIXED
     const supabaseClient = window.supabase.createClient(
       supabaseUrl,
-      supabaseAnonKey
+      supabaseKey
     );
 
     async function verifyEmail() {
@@ -67,22 +67,25 @@
           throw new Error("Verification code missing from URL.");
         }
 
-        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        const { error } =
+          await supabaseClient.auth.exchangeCodeForSession(code);
 
         if (error) {
           throw error;
         }
 
         document.getElementById("icon").textContent = "✅";
+        document.getElementById("icon").className = "icon success";
         document.getElementById("title").textContent = "Email Verified";
         document.getElementById("message").textContent =
           "Your email has been verified. You may now return to the SafeCall app.";
 
       } catch (err) {
         document.getElementById("icon").textContent = "❌";
+        document.getElementById("icon").className = "icon error";
         document.getElementById("title").textContent = "Verification Failed";
-        document.getElementById("message").textContent = err.message;
-        document.getElementById("message").className = "error";
+        document.getElementById("message").textContent =
+          err.message || "Verification failed.";
         console.error(err);
       }
     }
