@@ -5,8 +5,8 @@
   <title>SafeCall Email Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Supabase JS (global window.supabase) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- ✅ CORRECT Supabase UMD build -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
     body {
@@ -17,7 +17,6 @@
       align-items: center;
       background: linear-gradient(135deg, #a50034, #ff4d6d);
       font-family: Arial, sans-serif;
-      color: white;
     }
 
     .card {
@@ -53,7 +52,7 @@
     const SUPABASE_URL = "https://ifoluumtfnkhszhnhveu.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
 
-    // ✅ IMPORTANT: do NOT name this variable "supabase"
+    // ✅ window.supabase is now defined
     const sb = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_ANON_KEY
