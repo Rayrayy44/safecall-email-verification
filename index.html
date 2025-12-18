@@ -1,97 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>SafeCall Email Verification</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+  const SUPABASE_URL = "https://ifoluumtfnkhszhnhveu.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  // ✅ IMPORTANT: different variable name
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #a50034, #ff4d6d);
-      font-family: Arial, sans-serif;
-    }
+  async function verifyEmail() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token_hash = params.get("token_hash");
+      const type = params.get("type"); // signup | magiclink | recovery
 
-    .card {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 16px;
-      text-align: center;
-      width: 90%;
-      max-width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
-
-    .icon {
-      font-size: 52px;
-      margin-bottom: 16px;
-    }
-
-    .success { color: #2e7d32; }
-    .error { color: #c62828; }
-  </style>
-</head>
-
-<body>
-  <div class="card">
-    <div id="icon" class="icon">⏳</div>
-    <h2 id="title">Verifying your email</h2>
-    <p id="message">Please wait…</p>
-  </div>
-
-  <script>
-    const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
-    const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
-
-    const supabase = window.supabase.createClient(
-      supabaseUrl,
-      supabaseKey
-    );
-
-    async function verifyEmail() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-
-        const token_hash = params.get("token_hash");
-        const type = params.get("type"); // signup | recovery | magiclink
-
-        if (!token_hash || !type) {
-          throw new Error("Invalid verification link.");
-        }
-
-        const { error } = await supabase.auth.verifyOtp({
-          type,
-          token_hash,
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        document.getElementById("icon").textContent = "✅";
-        document.getElementById("icon").className = "icon success";
-        document.getElementById("title").textContent = "Email Verified";
-        document.getElementById("message").textContent =
-          "Your email has been verified. You may now return to the SafeCall app.";
-
-      } catch (err) {
-        document.getElementById("icon").textContent = "❌";
-        document.getElementById("icon").className = "icon error";
-        document.getElementById("title").textContent = "Verification Failed";
-        document.getElementById("message").textContent =
-          err.message || "Verification failed.";
-        console.error(err);
+      if (!token_hash || !type) {
+        throw new Error("Invalid or expired verification link.");
       }
-    }
 
-    verifyEmail();
-  </script>
-</body>
-</html>
+      const { error } = await supabaseClient.auth.verifyOtp({
+        type,
+        token_hash,
+      });
+
+      if (error) throw error;
+
+      document.getElementById("icon").textContent = "✅";
+      document.getElementById("icon").className = "icon success";
+      document.getElementById("title").textContent = "Email Verified";
+      document.getElementById("message").textContent =
+        "Your email has been verified. You may now return to the SafeCall app.";
+
+    } catch (err) {
+      document.getElementById("icon").textContent = "❌";
+      document.getElementById("icon").className = "icon error";
+      document.getElementById("title").textContent = "Verification Failed";
+      document.getElementById("message").textContent =
+        err.message ?? "Verification failed.";
+      console.error(err);
+    }
+  }
+
+  verifyEmail();
+</script>
