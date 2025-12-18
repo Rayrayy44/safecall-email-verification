@@ -1,35 +1,61 @@
-<script>
-  const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
-  const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SafeCall Verify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  async function verify() {
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<h2 id="status">⏳ Loading verification…</h2>
+
+<script>
+  try {
+    document.getElementById("status").innerText = "📦 Supabase loaded";
+
+    const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
+    const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
+
+    const supabase = window.supabase.createClient(
+      supabaseUrl,
+      supabaseKey
+    );
+
+    document.getElementById("status").innerText = "🔍 Reading verification code…";
+
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
 
     if (!code) {
-      document.getElementById("card").innerHTML = `
-        <h2>❌ Invalid verification link</h2>
-        <p>Missing verification code.</p>
-      `;
-      return;
+      document.getElementById("status").innerText =
+        "❌ No verification code found in URL";
+      throw new Error("Missing code");
     }
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    document.getElementById("status").innerText =
+      "🔐 Verifying email with Supabase…";
 
-    if (error) {
-      document.getElementById("card").innerHTML = `
-        <h2>❌ Verification failed</h2>
-        <p>${error.message}</p>
-      `;
-      return;
-    }
+    supabase.auth.exchangeCodeForSession(code)
+      .then(({ error }) => {
+        if (error) {
+          document.getElementById("status").innerText =
+            "❌ Verification failed: " + error.message;
+        } else {
+          document.getElementById("status").innerText =
+            "✅ Email verified! You may return to the app.";
+        }
+      });
 
-    document.getElementById("card").innerHTML = `
-      <h2>✅ Email verified</h2>
-      <p>You may now return to the SafeCall app.</p>
-    `;
+  } catch (e) {
+    document.getElementById("status").innerText =
+      "❌ JavaScript error: " + e.message;
+    console.error(e);
   }
-
-  verify();
 </script>
+
+</body>
+</html>
+
