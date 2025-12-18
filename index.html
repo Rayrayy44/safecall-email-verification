@@ -1,90 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>SafeCall Email Verification</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #a50034, #ff4d6d);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-    }
-    .card {
-      background: white;
-      padding: 32px;
-      border-radius: 16px;
-      text-align: center;
-      width: 90%;
-      max-width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.3);
-    }
-    .icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-    .success { color: #2e7d32; }
-    .error { color: #c62828; }
-    p { color: #444; }
-  </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-<div class="card" id="card">
-  <div class="icon">⏳</div>
-  <h2>Verifying your email…</h2>
-  <p>Please wait</p>
-</div>
-
 <script>
-  const supabaseUrl = "https://YOUR_PROJECT_ID.supabase.co";
-  const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
+  const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
+  const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
   const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
   async function verify() {
-    try {
-      // 1️⃣ Read code from URL (query OR hash)
-      const supabaseUrl = "https://ifoluumtfnkhszhnhveu.supabase.co";
-      const supabaseKey = "sb_publishable_Q6bzxDdjaaQGsF_JDkSJCA_6IDUyuzT";
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
 
-      const code =
-        queryParams.get("code") ||
-        hashParams.get("code");
-
-      if (!code) {
-        throw new Error("Invalid or missing verification code.");
-      }
-
-      // 2️⃣ Exchange code for session (THIS verifies email)
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-      if (error) throw error;
-
-      // 3️⃣ Success UI
+    if (!code) {
       document.getElementById("card").innerHTML = `
-        <div class="icon success">✅</div>
-        <h2>Email verified!</h2>
-        <p>You may now return to the SafeCall app and log in.</p>
+        <h2>❌ Invalid verification link</h2>
+        <p>Missing verification code.</p>
       `;
-
-    } catch (err) {
-      document.getElementById("card").innerHTML = `
-        <div class="icon error">❌</div>
-        <h2>Verification failed</h2>
-        <p>${err.message}</p>
-      `;
+      return;
     }
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      document.getElementById("card").innerHTML = `
+        <h2>❌ Verification failed</h2>
+        <p>${error.message}</p>
+      `;
+      return;
+    }
+
+    document.getElementById("card").innerHTML = `
+      <h2>✅ Email verified</h2>
+      <p>You may now return to the SafeCall app.</p>
+    `;
   }
 
   verify();
 </script>
-
-</body>
-</html>
